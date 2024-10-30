@@ -119,7 +119,7 @@ function QuestionViewer() {
 
   return (
     <>
-    <div className="mb-16"> <CountdownTimer/></div>
+    <div className=""> <CountdownTimer/></div>
       <div
         className={`container w-2/3${
           isArabic(currentQuestion.Title) ? "text-right" : "text-left"
@@ -175,7 +175,7 @@ function QuestionViewer() {
 
           <button
             onClick={handleNext}
-            className="w-2/4  py-2 mt-4 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+            className="w-full  py-2 mt-4 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
           >
             Next Question
           </button>
