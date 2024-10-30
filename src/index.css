@@ -1,3 +1,6 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
 
 ::-webkit-scrollbar-track {
     background-color: #f1f1f1;
