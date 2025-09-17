@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import correctSound from "./sounds/correct.mp3";
-import WrongAnswerSound from "./sounds/wrong.mp3";
+import correctSound from "./sounds/correct.m4a";
+import WrongAnswerSound from "./sounds/wrong.m4a";
 import { Rings } from "react-loader-spinner";
 import BottomNav from "./BottomNav";
 import CountdownTimer from "./Timer";
+
 function QuestionViewer() {
   const [questions, setQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -12,6 +13,7 @@ function QuestionViewer() {
   const [showAnswer, setShowAnswer] = useState(false);
   const [totalQuestions, setTotalQuestions] = useState(0);
   const [correctAnswers, setCorrectAnswers] = useState(0);
+  const [isMuted, setIsMuted] = useState(false); // Step 1: Mute state
 
   const addBiDiMarkers = (text) => {
     // Adding line breaks and LTR markers
@@ -91,19 +93,21 @@ function QuestionViewer() {
 
   const handleOptionClick = (option, optionIndex) => {
     setSelectedOption(option);
-
     setShowAnswer(true);
 
     if (String.fromCharCode(97 + optionIndex) === currentQuestion.currect) {
       setFeedbackMessage("Correct!");
-      const audio = new Audio(correctSound);
-      audio.play();
-
+      if (!isMuted) { // Step 3: Check mute status before playing sound
+        const audio = new Audio(correctSound);
+        audio.play();
+      }
       setCorrectAnswers((prev) => prev + 1);
     } else {
       setFeedbackMessage("Wrong, try again.");
-      const audio = new Audio(WrongAnswerSound);
-      audio.play();
+      if (!isMuted) { // Step 3: Check mute status before playing sound
+        const audio = new Audio(WrongAnswerSound);
+        audio.play();
+      }
     }
   };
 
@@ -117,17 +121,25 @@ function QuestionViewer() {
   const isArabic = (text) => /[\u0600-\u06FF]/.test(text);
   const questionText = addBiDiMarkers(currentQuestion.Title);
 
+  const toggleMute = () => { // Step 2: Toggle mute function
+    setIsMuted((prev) => !prev);
+  };
+
   return (
     <>
-    <div className=""> <CountdownTimer/></div>
+      <div className="w-full ">
+        <CountdownTimer />
+        <button onClick={toggleMute} className="mute-button">
+          {isMuted ? "Unmute" : "Mute"} {/* Mute Button */}
+        </button>
+      </div>
       <div
-        className={`container w-2/3${
-          isArabic(currentQuestion.Title) ? "text-right" : "text-left"
-        }`}
+        className={`w-full  ${isArabic(currentQuestion.Title) ? "text-right" : "text-left"
+          }`}
         dir={isArabic(currentQuestion.Title) ? "rtl" : "ltr"}
       >
-        <div className="question-card p-6 bg-white rounded-lg shadow-md">
-          <h2 className="text-xl font-bold mb-4">
+        <div className="bg-white rounded-lg shadow-md">
+          <h2 className="text-sm font-bold my-4">
             <span dangerouslySetInnerHTML={{ __html: questionText }} />
           </h2>
           {imageUrl && (
@@ -154,20 +166,24 @@ function QuestionViewer() {
                   <button
                     key={index}
                     onClick={() => handleOptionClick(option, index)}
-                    className={`w-full py-2 mb-2 text-left rounded border transition-colors 
-                  ${
-                    selectedOption === option
+                    className={`w-full py-2 mb-2  rounded border transition-colors 
+                  ${selectedOption === option
                       ? optionLabel === currentQuestion.currect
                         ? "bg-green-500 text-white"
                         : "bg-red-500 text-white"
                       : "bg-gray-200 hover:bg-gray-300"
-                  }`}
+                    }`}
                   >
-                    <span
-                      dangerouslySetInnerHTML={{
-                        __html: `${optionLabel}. ${optionText}`,
-                      }}
-                    />
+                    <div>
+                      <span
+                        className={`container${isArabic(optionText) ? " text-right " : "text-left "
+                          }`}
+                        dir={isArabic(optionText) ? "rtl" : "ltr"}
+                        dangerouslySetInnerHTML={{
+                          __html: `${optionLabel}. ${optionText}`,
+                        }}
+                      />
+                    </div>
                   </button>
                 );
               })}
@@ -182,7 +198,7 @@ function QuestionViewer() {
         </div>
       </div>
       <div>
-        <BottomNav correctAnswers={correctAnswers} totalQuestions={totalQuestions}/>
+        <BottomNav correctAnswers={correctAnswers} totalQuestions={totalQuestions} />
       </div>
     </>
   );
